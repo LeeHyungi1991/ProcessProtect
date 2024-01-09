@@ -21,5 +21,5 @@ void PostCallback(PVOID RegistrationContext, POB_POST_OPERATION_INFORMATION pOpe
 //========== User-defined Function  ==========//
 //============================================//
 
-NTSTATUS ObRegExample();
+NTSTATUS ObRegisterCallbackStart();
 

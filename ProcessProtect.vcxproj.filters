@@ -38,9 +38,6 @@
     <ClInclude Include="callbacks.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="RegMonitor.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

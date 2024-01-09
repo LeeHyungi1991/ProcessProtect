@@ -9,7 +9,6 @@
 #define PROCESS_VM_WRITE        0x0020	// WriteProcessMemory
 
 #define SOURCE "webmail_secure_agent.exe"
-#define SERVICE "sc.exe"
 
 
 
@@ -51,11 +50,6 @@ int CompreFilenameWithLength(const wchar_t* FileName, int Length, char target[],
 	return 0;
 }
 
-int CompreFilenameWrap2(const UNICODE_STRING FileName, char target[])
-{
-	return CompreFilename(FileName.Buffer, FileName.Length / sizeof(wchar_t), target);
-}
-
 int CompreFilenameWrap(const UNICODE_STRING FileName, char target[])
 {
 	return CompreFilename(FileName.Buffer, FileName.Length / sizeof(wchar_t), target);
@@ -75,21 +69,20 @@ PreCallback(
 	if (pOperationInformation->Operation == OB_OPERATION_HANDLE_CREATE)
 	{	
 		unsigned long mask = pOperationInformation->Parameters->CreateHandleInformation.OriginalDesiredAccess;						
-		if (mask & PROCESS_TERMINATE && mask != 12800 && mask != 2097151)
+		if (mask & PROCESS_TERMINATE) // || mask & PROCESS_VM_OPERATION || mask & PROCESS_VM_READ || mask & PROCESS_VM_WRITE
 		{
-			if (mask % 2 == 1)
-			{								
-				PEPROCESS pEproc = (PEPROCESS)pOperationInformation->Object;
-				PUNICODE_STRING pname = { 0, };
-				NTSTATUS status = SeLocateProcessImageName(pEproc, &pname);
-				if (NT_SUCCESS(status))
-				{								
-					if (CompreFilenameWrap(*pname, SOURCE))
-					{
-						pOperationInformation->Parameters->CreateHandleInformation.DesiredAccess = 0;
-					}
-					//RtlFreeUnicodeString(pname);
-				}								
+			if (mask == 12800 || mask == 2097151) {
+				return;
+			}
+			PEPROCESS pEproc = (PEPROCESS)pOperationInformation->Object;
+			PUNICODE_STRING pname = { 0, };
+			NTSTATUS status = SeLocateProcessImageName(pEproc, &pname);
+			if (NT_SUCCESS(status))
+			{
+				if (CompreFilenameWrap(*pname, SOURCE))
+				{
+					pOperationInformation->Parameters->CreateHandleInformation.DesiredAccess = 0;
+				}
 			}
 		}			
 	}
